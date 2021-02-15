@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import waterfall from "./video_preview_h264.gif";
+import tokyo from "./tokyo-0-120-2160p.mp4";
 
 import "./App.css";
 
@@ -17,7 +18,8 @@ const App = () => {
     // Jank: Width and height don't seem to get set immediately thus the delay
     setTimeout(() => {
       img.current = node;
-      const { width, height } = node;
+      const { width, height } = node.getBoundingClientRect();
+      console.log(node, width, height, node.getBoundingClientRect());
       const containerNode = document.getElementById("canvas-container");
 
       const canvas = (
@@ -28,7 +30,7 @@ const App = () => {
 
       const ctx = canvasNode.getContext("2d");
       c.current = ctx;
-    }, 100);
+    }, 1000);
   }, []);
 
   const resetAlphaMask = (x, y, radiusInner = 50, radiusOuter = 100) => {
@@ -48,6 +50,7 @@ const App = () => {
 
     // Reapply alpha mask
     // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+    // https://developer.mozilla.org/en-US/docs/Web/Guide/Audio_and_video_manipulation
     ctx.globalCompositeOperation = "destination-out";
     const gradient = ctx.createRadialGradient(
       x,
@@ -64,7 +67,8 @@ const App = () => {
   };
 
   const handleMouseMove = (e) => {
-    resetAlphaMask(e.clientX, e.clientY);
+    resetAlphaMask(e.clientX, e.clientY, 300, 500);
+    console.log("mouse");
   };
 
   return (
@@ -74,7 +78,8 @@ const App = () => {
           id="canvas-container"
           style={{ position: "absolute", top: 0, left: 0 }}
         ></div>
-        <img ref={handleVideoRef} src={waterfall} alt="waterfall" />
+        <video ref={handleVideoRef} src={tokyo} autoPlay loop muted />
+        {/* <img ref={handleVideoRef} src={waterfall} alt="waterfall" /> */}
       </div>
       <header className="App-header">
         <p>
