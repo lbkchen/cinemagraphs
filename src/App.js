@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import waterfall from "./video_preview_h264.gif";
-import tokyo from "./tokyo-0-120-2160p.mp4";
+// import waterfall from "./video_preview_h264.gif";
+import tokyo from "./tokyo-0-10-stab-1080p.mp4";
 
 import "./App.css";
 
