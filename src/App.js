@@ -68,7 +68,6 @@ const App = () => {
 
   const handleMouseMove = (e) => {
     resetAlphaMask(e.clientX, e.clientY, 300, 500);
-    console.log("mouse");
   };
 
   return (
@@ -79,13 +78,7 @@ const App = () => {
           style={{ position: "absolute", top: 0, left: 0 }}
         ></div>
         <video ref={handleVideoRef} src={tokyo} autoPlay loop muted />
-        {/* <img ref={handleVideoRef} src={waterfall} alt="waterfall" /> */}
       </div>
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-      </header>
     </div>
   );
 };
