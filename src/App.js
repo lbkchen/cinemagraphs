@@ -67,7 +67,7 @@ const App = () => {
   };
 
   const handleMouseMove = (e) => {
-    resetAlphaMask(e.clientX, e.clientY, 300, 500);
+    resetAlphaMask(e.pageX, e.pageY, 300, 500);
   };
 
   return (
