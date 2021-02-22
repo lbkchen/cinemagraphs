@@ -55,6 +55,9 @@ const App = () => {
       c1.current = c1Node.getContext("2d");
       c2.current = c2Node.getContext("2d");
       c3.current = c3Node.getContext("2d");
+
+      // Init hidden canvases
+      c2.current.drawImage(node, 0, 0, width, height);
     }, 1000);
   }, []);
 
