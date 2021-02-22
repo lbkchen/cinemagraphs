@@ -27,6 +27,10 @@
   color: #61dafb;
 }
 
+#c1:hover {
+  cursor: url("cursor.svg"), auto;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
