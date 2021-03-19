@@ -1,16 +1,58 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import _ from "lodash";
 
 // import waterfall from "./video_preview_h264.gif";
 import tokyo from "./tokyo-0-10-stab-1080p.mp4";
 
 import "./App.css";
 
+class PlaybackCache {
+  constructor({ size = 100 }) {
+    this.size = size;
+
+    // TODO: Convert to quadtree
+    this.cache = [];
+    this.cacheIndex = 0;
+  }
+
+  /**
+   * Cache a coordinate and the currently playback ts.
+   */
+  add = ({ x, y, ts }) => {
+    console.log("called add w/size", this.cache.length);
+    this.cache[this.cacheIndex] = { x, y, ts };
+
+    this.cacheIndex = (this.cacheIndex + 1) % this.size;
+  };
+
+  /**
+   * Get ts of the closest cached coordinate.
+   */
+  get = ({ x, y }) => {
+    if (this.cache.length === 0) {
+      console.log("returned null", this.cache, this.cacheIndex);
+      return null;
+    }
+    // Sort by closest cartesian distance
+    const sortedCache = this.cache.slice().sort((c1, c2) => {
+      const d1 = (c1.x - x) ** 2 + (c1.y - y) ** 2;
+      const d2 = (c2.x - x) ** 2 + (c2.y - y) ** 2;
+      return d1 - d2;
+    });
+    console.log({ sortedCache: sortedCache.slice(0, 5) });
+
+    return sortedCache[0].ts;
+  };
+}
+
 const App = () => {
   const c1 = React.useRef(null); // Top-level canvas that overlays on top of the video
   const c2 = React.useRef(null); // Hidden canvas that caches the accumulated strokes
   const c3 = React.useRef(null); // Hidden canvas that caches the inner region (Basically C2 - C1)
   const img = React.useRef(null); // Source image/video node
+
+  const playbackCache = new PlaybackCache({ size: 100 });
 
   const handleVideoRef = React.useCallback((node) => {
     if (!node) {
@@ -183,6 +225,27 @@ const App = () => {
     ctx.fillRect(0, 0, width, height);
   };
 
+  const throttledCachePlayback = _.throttle(({ x, y, ts }) => {
+    playbackCache.add({ x, y, ts });
+  }, 400);
+
+  const getCurrentTs = ({ x, y }) => {
+    const imgNode = img.current;
+    if (!imgNode) {
+      return;
+    }
+    const ts = imgNode.currentTime;
+    console.log(imgNode.currentTime);
+
+    // Cache current playback
+    throttledCachePlayback({ x, y, ts });
+
+    const cachedTs = playbackCache.get({ x, y });
+    if (cachedTs !== null) {
+      imgNode.currentTime = cachedTs;
+    }
+  };
+
   const handleMouseMove = (e) => {
     const { pageX: x, pageY: y } = e;
     const radiusInner = 200;
@@ -191,6 +254,9 @@ const App = () => {
     resetC3({ x, y, radiusInner, radiusOuter });
     resetC2();
     resetC1({ x, y, radiusInner, radiusOuter });
+    // TODO: Fix playback -- need to do something with radius and
+    // only triggering on pause/decelerate.
+    // getCurrentTs({ x, y });
   };
 
   return (
