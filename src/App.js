@@ -17,49 +17,62 @@ const App = () => {
       return;
     }
 
-    // Jank: Width and height don't seem to get set immediately thus the delay
-    setTimeout(() => {
-      img.current = node;
-      const { width, height } = node.getBoundingClientRect();
-      const containerNode = document.getElementById("canvas-container");
-
-      const canvases = (
-        <>
-          <canvas
-            id="c3"
-            style={{ position: "absolute", top: 0, left: 0, zIndex: -2 }}
-            width={width}
-            height={height}
-          />
-          <canvas
-            id="c2"
-            style={{ position: "absolute", top: 0, left: 0, zIndex: -1 }}
-            width={width}
-            height={height}
-          />
-          {/* This one must sit above the video */}
-          <canvas
-            id="c1"
-            style={{ position: "absolute", top: 0, left: 0, zIndex: 1 }}
-            width={width}
-            height={height}
-          />
-        </>
-      );
-      ReactDOM.render(canvases, containerNode);
-
-      const c1Node = document.getElementById("c1");
-      const c2Node = document.getElementById("c2");
-      const c3Node = document.getElementById("c3");
-
-      c1.current = c1Node.getContext("2d");
-      c2.current = c2Node.getContext("2d");
-      c3.current = c3Node.getContext("2d");
-
-      // Init hidden canvases
-      c2.current.drawImage(node, 0, 0, width, height);
-    }, 1000);
+    /**
+     * This listener is called when the video data is available. We need
+     * to get both the w/h metadata as well as the current frame of the
+     * video to paint the canvas.
+     *
+     * See: https://www.w3schools.com/tags/av_event_loadeddata.asp
+     */
+    node.onloadeddata = function () {
+      initializeCanvases({
+        node,
+        width: this.videoWidth,
+        height: this.videoHeight,
+      });
+    };
   }, []);
+
+  const initializeCanvases = ({ node, width, height }) => {
+    img.current = node;
+    const containerNode = document.getElementById("canvas-container");
+
+    const canvases = (
+      <>
+        <canvas
+          id="c3"
+          style={{ position: "absolute", top: 0, left: 0, zIndex: -2 }}
+          width={width}
+          height={height}
+        />
+        <canvas
+          id="c2"
+          style={{ position: "absolute", top: 0, left: 0, zIndex: -1 }}
+          width={width}
+          height={height}
+        />
+        {/* This one must sit above the video */}
+        <canvas
+          id="c1"
+          style={{ position: "absolute", top: 0, left: 0, zIndex: 1 }}
+          width={width}
+          height={height}
+        />
+      </>
+    );
+    ReactDOM.render(canvases, containerNode);
+
+    const c1Node = document.getElementById("c1");
+    const c2Node = document.getElementById("c2");
+    const c3Node = document.getElementById("c3");
+
+    c1.current = c1Node.getContext("2d");
+    c2.current = c2Node.getContext("2d");
+    c3.current = c3Node.getContext("2d");
+
+    // Init hidden canvases
+    c2.current.drawImage(node, 0, 0, width, height);
+  };
 
   /**
    * Old method that doesn't stop the rest of the frame from progressing
@@ -185,6 +198,7 @@ const App = () => {
           style={{ position: "absolute", top: 0, left: 0 }}
         ></div>
         <video
+          className="video"
           ref={handleVideoRef}
           src={tokyo}
           style={{ position: "absolute", top: 0, left: 0, zIndex: 0 }}
