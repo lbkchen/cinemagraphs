@@ -72,6 +72,9 @@ const App = () => {
 
     // Init hidden canvases
     c2.current.drawImage(node, 0, 0, width, height);
+
+    // This covers the video to make it initialize as a static img
+    c1.current.drawImage(node, 0, 0, width, height);
   };
 
   /**
